@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Red Rebels...</title>
+    <script id="k-vertex-shader" type="x-shader/x-vertex">
+      uniform float Leaves;
+      varying float segAng;
+      varying vec2 vertTexCoord;
+      #define PI 3.14159265359
+
+      void main() {
+        vertTexCoord = uv;
+        segAng = 2. * PI / Leaves;
+        gl_Position = vec4(position, 1.0);
+      }
+    </script>
+    <script id="k-fragment-shader" type="x-shader/x-fragment">
+      varying float segAng;
+      uniform sampler2D texture1;
+      uniform sampler2D texture2;
+      uniform sampler2D texture3;
+      uniform float ScreenAspect;
+      uniform vec2 UVLimit;
+      uniform float Zoom;
+      uniform float Angle;
+      uniform float OutAngle;
+      uniform vec2 Centre;
+      uniform vec2 ImageCentre;
+
+      varying vec4 vertColor;
+      varying vec2 vertTexCoord;
+
+      //2d cartesian to polar coordinates
+      vec2 car2pol(vec2 IN) {
+        return vec2(length(IN), atan(IN.y,IN.x));
+      }
+      //2d polar to cartesian coordinates
+      vec2 pol2car(vec2 IN) {
+        return vec2(IN.x * cos(IN.y), IN.x * sin(IN.y));
+      }
+      vec2 mirrorRepeat(vec2 uv, vec2 limit) {
+        //https://www.desmos.com/calculator/jqniynd1hh
+        //return abs(mod((vec2(-1.)-uv),vec2(2.))+vec2(1.));
+        return min(abs(mod(uv, 2.*limit)), abs(mod(2.*limit-uv, 2.*limit)));
+      }
+
+
+
+      void main(void) {
+        vec2 uv = vertTexCoord.xy / UVLimit;
+        uv.x *= ScreenAspect;
+        vec2 c = Centre;
+        c.x *= ScreenAspect;
+
+        vec2 polar = car2pol(uv - c/UVLimit);
+        polar.y += OutAngle * segAng;
+        float fr = fract(polar.y / segAng);
+        polar.y = Angle + (fr > 0.5 ? 1.-fr : fr) * segAng;
+        polar.x *= Zoom;
+
+        //vec2 uv2 = UV_Rectify((UVLimit*pol2car(polar))+ImageCentre);
+        vec2 uv2 = pol2car(polar)+ImageCentre;
+        //uv2.x /= ScreenAspect;
+        uv2 = mirrorRepeat(uv2, UVLimit);
+
+
+        //vec2 uv2 = pol2car(polar)+vec2(ScreenAspect, 1.) * ImageCentre;
+        //uv2 = UV_Rectify(uv2, UVLimit);
+        vec4 col = texture2D(texture1, uv2);
+        col = min(col, texture2D(texture2, uv2));
+        col = min(col, texture2D(texture3, uv2));
+        //col /= 3.;
+
+        gl_FragColor = col;// * vertColor;
+      }
+
+    </script>
+  </head>
+  <body>
+    <noscript>JavaScript is required to view this page</noscript>
+<!--    <img src="../rebels/im1.jpg"  alt="accessible content"/>-->
+<!--  <video id="vid" autoplay></video>-->
+  <video id="vid1" style="display: none" autoplay loop muted></video>
+  <video id="vid2" style="display: none" autoplay loop muted></video>
+  <video id="vid3" style="display: none" autoplay loop muted></video>
+  </body>
+</html>

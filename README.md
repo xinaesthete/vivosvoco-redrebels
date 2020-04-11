@@ -1,1 +1,2 @@
-# vivosvoco-redrebels
+# Extinction Rebellion Winchester Red Rebel graphics...
+Based on threejs template https://github.com/Joh4nnesB/threejs-typescript-webpack
