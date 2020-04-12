@@ -1,20 +1,18 @@
 import './main.css'
 import {
-    Scene,
-    WebGLRenderer,
     Mesh,
     OrthographicCamera,
     PlaneGeometry,
-    DoubleSide,
+    Scene,
     ShaderMaterial,
+    Texture,
+    TextureLoader,
     Vector2,
-    VideoTexture
+    VideoTexture,
+    WebGLRenderer
 } from 'three'
 
 import * as im1 from '../assets/20200410_125907.webm' //./vid1.webm'
-import * as im2 from '../assets/20200410_130510.webm' //./vid1.webm'
-import * as im3 from '../assets/rrfriday1.webm' //./vid1.webm'
-
 import * as dat from 'dat.gui'
 
 const scene = new Scene();
@@ -37,7 +35,7 @@ const vidEl = document.getElementById("vid1") as HTMLVideoElement;
 const vidUrl = im1; // require('../rebels/vid1.webm');
 console.log(vidUrl);
 vidEl.src = vidUrl;
-const vidTex = new VideoTexture(vidEl);
+const vidTex: Texture = new VideoTexture(vidEl);
 
 // const vidEl2 = document.getElementById("vid2") as HTMLVideoElement;
 // const vidUrl2 = im2;
@@ -85,7 +83,6 @@ gui.add(uniforms.Centre.value, 'y').min(0).max(1).name('Output CentreY');
 
 const geo = new PlaneGeometry(2, 2);
 const mat = new ShaderMaterial({vertexShader: vs, fragmentShader: fs, uniforms: uniforms});
-mat.side = DoubleSide;
 const mesh = new Mesh(geo, mat);
 mesh.position.x = 0.5;
 mesh.position.y = 0.5;
@@ -117,14 +114,16 @@ renderer.domElement.ondrop = e => {
         const item = e.dataTransfer.items[0];
         if (item.kind === 'file') {
             const file = item.getAsFile();
-            if (file.type.startsWith('video/')) {
-                const reader = new FileReader();
-                reader.onload = readEvent => vidEl.src = readEvent.target.result as string;
-                reader.readAsDataURL(file);
-                //vidEl.src = file.name;
-            } else if (file.type.startsWith('image/')) {
-                //TODO
-            }
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = readEvent => {
+                const result = readEvent.target.result as string;
+                if (file.type.startsWith('video/')) {
+                    vidEl.src = result;
+                } else if (file.type.startsWith('image/')) {
+                    uniforms.texture1.value = new TextureLoader().load(readEvent.target.result as string);
+                }
+            };
         }
     }
 };
