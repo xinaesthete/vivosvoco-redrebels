@@ -8,7 +8,7 @@ import {
     DoubleSide,
     ShaderMaterial,
     Vector2,
-    VideoTexture, TextureLoader, MirroredRepeatWrapping
+    VideoTexture
 } from 'three'
 
 import * as im1 from '../assets/20200410_125907.webm' //./vid1.webm'
@@ -29,7 +29,6 @@ const renderer = new WebGLRenderer({
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-
 const vs = document.getElementById('k-vertex-shader').textContent;
 const fs = document.getElementById('k-fragment-shader').textContent;
 
@@ -40,45 +39,47 @@ console.log(vidUrl);
 vidEl.src = vidUrl;
 const vidTex = new VideoTexture(vidEl);
 
-const vidEl2 = document.getElementById("vid2") as HTMLVideoElement;
-const vidUrl2 = im2;
-console.log(vidUrl2);
-vidEl2.src = vidUrl2;
-const vidTex2 = new VideoTexture(vidEl2);
-
-const vidEl3 = document.getElementById("vid3") as HTMLVideoElement;
-const vidUrl3 = im3;
-console.log(vidUrl3);
-vidEl3.src = vidUrl3;
-const vidTex3 = new VideoTexture(vidEl3);
+// const vidEl2 = document.getElementById("vid2") as HTMLVideoElement;
+// const vidUrl2 = im2;
+// console.log(vidUrl2);
+// vidEl2.src = vidUrl2;
+// const vidTex2 = new VideoTexture(vidEl2);
+//
+// const vidEl3 = document.getElementById("vid3") as HTMLVideoElement;
+// const vidUrl3 = im3;
+// console.log(vidUrl3);
+// vidEl3.src = vidUrl3;
+// const vidTex3 = new VideoTexture(vidEl3);
 
 
 let w = window.innerWidth, h = window.innerHeight;
 
 const uniforms = {
     ScreenAspect: {value: w/h},
-    Leaves: {value: 2},
-    Angle: {value: 1},
+    Leaves: {value: 3},
+    Angle: {value: 1.05},
     OutAngle: {value: 0},
-    Zoom: {value: 1},
+    Zoom: {value: 1.3},
     Centre: {value: new Vector2(0.5, 0.5)},
-    ImageCentre: {value: new Vector2(0.27, 0.)},
+    ImageCentre: {value: new Vector2(0.5, 0.)},
+//    UVLimit: {value: new Vector2(1920/2048, 1080/2048)},// vidTex.repeat},
     UVLimit: {value: new Vector2(1920/2048, 1080/2048)},// vidTex.repeat},
     texture1: {value: vidTex},
-    texture2: {value: vidTex2},
-    texture3: {value: vidTex3}
+    // texture2: {value: vidTex2},
+    // texture3: {value: vidTex3}
 };
 
 const gui = new dat.GUI();
 gui.add(vidEl, 'playbackRate').min(0).max(20).name('rate1');
-gui.add(vidEl2, 'playbackRate').min(0).max(20).name('rate2');
-gui.add(vidEl3, 'playbackRate').min(0).max(20).name('rate3');
-gui.add(uniforms.Leaves, 'value').min(1).max(8).name('Leaves');
+//gui.add(vidEl2, 'playbackRate').min(0).max(20).name('rate2');
+//gui.add(vidEl3, 'playbackRate').min(0).max(20).name('rate3');
+
+gui.add(uniforms.Leaves, 'value').min(1).max(8).name('Leaves').step(1);
 gui.add(uniforms.Angle, 'value').min(-Math.PI).max(Math.PI).name('Angle');
 gui.add(uniforms.OutAngle, 'value').min(-1).max(1).name('OutAngle');
 gui.add(uniforms.Zoom, 'value').min(0).max(10).name('Zoom');
-gui.add(uniforms.ImageCentre.value, 'x').min(0).max(1).name('ImageCentreX');
-gui.add(uniforms.ImageCentre.value, 'y').min(0).max(1).name('ImageCentreY');
+gui.add(uniforms.ImageCentre.value, 'x').min(-1).max(1).name('ImageCentreX');
+gui.add(uniforms.ImageCentre.value, 'y').min(-1).max(1).name('ImageCentreY');
 gui.add(uniforms.Centre.value, 'x').min(0).max(1).name('Output CentreX');
 gui.add(uniforms.Centre.value, 'y').min(0).max(1).name('Output CentreY');
 
@@ -106,3 +107,25 @@ window.onresize = _ => {
     //camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 };
+renderer.domElement.ondragover = e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+};
+renderer.domElement.ondrop = e => {
+    e.preventDefault();
+    if (e.dataTransfer.items) {
+        const item = e.dataTransfer.items[0];
+        if (item.kind === 'file') {
+            const file = item.getAsFile();
+            if (file.type.startsWith('video/')) {
+                const reader = new FileReader();
+                reader.onload = readEvent => vidEl.src = readEvent.target.result as string;
+                reader.readAsDataURL(file);
+                //vidEl.src = file.name;
+            } else if (file.type.startsWith('image/')) {
+                //TODO
+            }
+        }
+    }
+};
+

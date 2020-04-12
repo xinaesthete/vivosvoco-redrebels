@@ -48,8 +48,9 @@
 
 
       void main(void) {
-        vec2 uv = vertTexCoord.xy / UVLimit;
-        uv.x *= ScreenAspect;
+        vec2 uv = vertTexCoord.xy;// / UVLimit;
+        uv.x *= ScreenAspect; //doesn't seem to make sense to do this after "/ UVLimit".
+        uv /= UVLimit; //TODO think coherently about coordinates :)
         vec2 c = Centre;
         c.x *= ScreenAspect;
 
@@ -59,17 +60,16 @@
         polar.y = Angle + (fr > 0.5 ? 1.-fr : fr) * segAng;
         polar.x *= Zoom;
 
-        //vec2 uv2 = UV_Rectify((UVLimit*pol2car(polar))+ImageCentre);
         vec2 uv2 = pol2car(polar)+ImageCentre;
-        //uv2.x /= ScreenAspect;
-        uv2 = mirrorRepeat(uv2, UVLimit);
+        uv2.x /= ScreenAspect;
+        //uv2 = mirrorRepeat(uv2, UVLimit);
 
-
-        //vec2 uv2 = pol2car(polar)+vec2(ScreenAspect, 1.) * ImageCentre;
-        //uv2 = UV_Rectify(uv2, UVLimit);
         vec4 col = texture2D(texture1, uv2);
-        col = min(col, texture2D(texture2, uv2));
-        col = min(col, texture2D(texture3, uv2));
+
+        //col.rg += uv2 - mirrorRepeat(uv2, UVLimit);
+
+        //col = min(col, texture2D(texture2, uv2));
+        //col = min(col, texture2D(texture3, uv2));
         //col /= 3.;
 
         gl_FragColor = col;// * vertColor;
@@ -79,8 +79,6 @@
   </head>
   <body>
     <noscript>JavaScript is required to view this page</noscript>
-<!--    <img src="../rebels/im1.jpg"  alt="accessible content"/>-->
-<!--  <video id="vid" autoplay></video>-->
   <video id="vid1" style="display: none" autoplay loop muted></video>
   <video id="vid2" style="display: none" autoplay loop muted></video>
   <video id="vid3" style="display: none" autoplay loop muted></video>
