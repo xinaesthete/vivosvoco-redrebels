@@ -96,6 +96,9 @@ function animate() {
   //uniforms.iTime.value = Date.now() / 1000;
   let w = window.innerWidth, h = window.innerHeight;
   uniforms.ScreenAspect.value = w/h;
+  const img = uniforms.texture1.value;
+
+  uniforms.UVLimit.value = img.repeat;
   renderer.render(scene, camera);
 }
 animate();
@@ -120,8 +123,9 @@ renderer.domElement.ondrop = e => {
                 const result = readEvent.target.result as string;
                 if (file.type.startsWith('video/')) {
                     vidEl.src = result;
+                    vidEl.onloadeddata = () => vidEl.play();
                 } else if (file.type.startsWith('image/')) {
-                    uniforms.texture1.value = new TextureLoader().load(readEvent.target.result as string);
+                    const t = uniforms.texture1.value = new TextureLoader().load(readEvent.target.result as string);
                 }
             };
         }

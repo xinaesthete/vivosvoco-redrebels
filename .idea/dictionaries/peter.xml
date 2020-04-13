@@ -2,6 +2,8 @@
   <dictionary name="peter">
     <words>
       <w>kaleid</w>
+      <w>lerp</w>
+      <w>targ</w>
     </words>
   </dictionary>
 </component>

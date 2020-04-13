@@ -1,6 +1,6 @@
 
 function lerp(s, t, a) {
-    return s + a*(s-t);
+    return s + a*(t-s);
 }
 
 export class LagNum {
@@ -25,14 +25,14 @@ export class ShaderParam {
     uniformObj: any; //TODO: type
     constructor(uniforms, name, init= 0.5, min= 0, max= 1, lagTime = 1) {
         this.uniforms = uniforms;
-        this.uniforms[name] = {value: init};
+        if (this.uniforms[name]) this.uniformObj = this.uniforms[name];
+        else this.uniforms[name] = { value: init };
         this.name = name;
         this.min = min;
         this.max = max;
         this.val = new LagNum(init, lagTime);
     }
     update(dt: number) {
-        const v = this.val.update(dt);
-        this.uniformObj.value = v;
+        this.uniformObj.value = this.val.update(dt);
     }
 }
