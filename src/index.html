@@ -62,7 +62,7 @@
 
         vec2 uv2 = pol2car(polar)+ImageCentre;
         uv2.x /= ScreenAspect;
-        //uv2 = mirrorRepeat(uv2, UVLimit);
+        uv2 = mirrorRepeat(uv2, UVLimit);
 
         vec4 col = texture2D(texture1, uv2);
 
