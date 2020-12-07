@@ -1,19 +1,53 @@
+import * as dat from "dat.gui"
+import * as THREE from 'three'
 
 function lerp(s, t, a) {
+    if (a<0) return s;
+    if (a>1) return t;
     return s + a*(t-s);
 }
 
-export class LagNum {
-    lagTime: number = 1;
+class LagNum {
+    lagTime: number = 1000;
     curVal: number;
     targVal: number;
-    constructor(val: number, lagTime = 1) {
+    constructor(val: number, lagTime = 1000) {
         this.curVal = this.targVal = val;
         this.lagTime = lagTime;
     }
     update(dt: number) {
-        return this.curVal = lerp(this.curVal, this.targVal, Math.pow(0.0001, dt*this.lagTime));
+        if (dt <= 0) return;
+        const a = 1. - Math.pow(0.0001, dt/this.lagTime);
+        return this.curVal = lerp(this.curVal, this.targVal, a);
     }
+}
+
+
+//ways of moving:
+//constant direction (wrap)
+//ping-pong
+//noise
+//smooth oscillation
+//shaped oscillation
+
+export interface Scalar {
+    name: string,
+    v?: number,// | THREE.Vector2 | THREE.Vector3 | THREE.Vector4,
+    min?: number,
+    max?: number,
+    step?: number
+}
+
+const gui = new dat.GUI();
+export const makeUniforms = (specs: Scalar[], uniforms:any = {}) => {
+    const parms: ShaderParam[] = [];
+    specs.forEach(s => {
+        //uniforms[s.name] = {value: s.v}
+        const p = new ShaderParam(uniforms, s.name, s.v, s.min, s.max);
+        parms.push(p);
+        gui.add(p.val, 'targVal', s.min, s.max, s.step).name(s.name);
+    });
+    return parms;
 }
 
 export class ShaderParam {
@@ -21,9 +55,9 @@ export class ShaderParam {
     name: string;
     min: number;
     max: number;
-    uniforms: any;
+    uniforms: any; //the structure of which this is a member
     uniformObj: any; //TODO: type
-    constructor(uniforms, name, init= 0.5, min= 0, max= 1, lagTime = 1) {
+    constructor(uniforms, name, init= 0.5, min= 0, max= 1, lagTime = 1000) {
         this.uniforms = uniforms;
         if (this.uniforms[name]) this.uniformObj = this.uniforms[name];
         else this.uniforms[name] = { value: init };

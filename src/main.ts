@@ -11,6 +11,7 @@ import {
     VideoTexture,
     WebGLRenderer
 } from 'three'
+import {makeUniforms} from './params'
 
 import * as im1 from '../assets/20200410_125907.webm' //./vid1.webm'
 import * as dat from 'dat.gui'
@@ -66,16 +67,20 @@ const uniforms = {
     // texture2: {value: vidTex2},
     // texture3: {value: vidTex3}
 };
+const PI = 3.14159;
+
+const parms = makeUniforms([
+    {name: "Leaves", v: 3, min: 1, max: 8, step: 1},
+    {name: "Angle", v: 1.05, min: -Math.PI, max: Math.PI},
+    {name: "OutAngle", v: 0, min: -Math.PI, max: Math.PI},
+    {name: "Zoom", v: 1.3, min: 0, max: 10},
+], uniforms);
 
 const gui = new dat.GUI();
 gui.add(vidEl, 'playbackRate').min(0).max(20).name('rate1');
 //gui.add(vidEl2, 'playbackRate').min(0).max(20).name('rate2');
 //gui.add(vidEl3, 'playbackRate').min(0).max(20).name('rate3');
 
-gui.add(uniforms.Leaves, 'value').min(1).max(8).name('Leaves').step(1);
-gui.add(uniforms.Angle, 'value').min(-Math.PI).max(Math.PI).name('Angle');
-gui.add(uniforms.OutAngle, 'value').min(-1).max(1).name('OutAngle');
-gui.add(uniforms.Zoom, 'value').min(0).max(10).name('Zoom');
 gui.add(uniforms.ImageCentre.value, 'x').min(-1).max(1).name('ImageCentreX');
 gui.add(uniforms.ImageCentre.value, 'y').min(-1).max(1).name('ImageCentreY');
 gui.add(uniforms.Centre.value, 'x').min(0).max(1).name('Output CentreX');
@@ -90,8 +95,8 @@ mesh.position.y = 0.5;
 //mesh.position.z = 0.5;
 //mesh.updateMatrix();
 scene.add(mesh);
-
-function animate() {
+let t0 = Date.now();
+function animate(time: number) {
   requestAnimationFrame(animate);
   //uniforms.iTime.value = Date.now() / 1000;
   let w = window.innerWidth, h = window.innerHeight;
@@ -99,9 +104,12 @@ function animate() {
   const img = uniforms.texture1.value;
 
   uniforms.UVLimit.value = img.repeat;
+  const dt = time - t0;
+  t0 = time;
+  parms.forEach(p => p.update(dt))
   renderer.render(scene, camera);
 }
-animate();
+animate(t0);
 window.onresize = _ => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     //camera.aspect = window.innerWidth / window.innerHeight;
@@ -116,14 +124,21 @@ renderer.domElement.ondrop = e => {
     if (e.dataTransfer.items) {
         const item = e.dataTransfer.items[0];
         if (item.kind === 'file') {
+            const t = Date.now();
             const file = item.getAsFile();
             const reader = new FileReader();
+            //seems like this will attempt to read entire file, blocking, before continuing...
             reader.readAsDataURL(file);
+            console.log(`readAsDataURL took ${Date.now() - t}`);
             reader.onload = readEvent => {
+                console.log(`onload took ${Date.now() - t}`);
                 const result = readEvent.target.result as string;
                 if (file.type.startsWith('video/')) {
                     vidEl.src = result;
-                    vidEl.onloadeddata = () => vidEl.play();
+                    vidEl.onloadeddata = () => {
+                        console.log(`onloadeddata took ${Date.now() - t}`);
+                        vidEl.play();
+                    }
                 } else if (file.type.startsWith('image/')) {
                     const t = uniforms.texture1.value = new TextureLoader().load(readEvent.target.result as string);
                 }
