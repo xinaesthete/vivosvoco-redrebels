@@ -24,6 +24,7 @@
       uniform vec2 UVLimit;
       uniform float Zoom;
       uniform float Angle;
+      uniform float KaleidMix;
       uniform float OutAngle;
       uniform float Mozaic;
       uniform float MozMix;
@@ -51,18 +52,14 @@
         //return abs(mod((vec2(-1.)-uv),vec2(2.))+vec2(1.));
         return min(abs(mod(uv, 2.*limit)), abs(mod(2.*limit-uv, 2.*limit)));
       }
-      float bias(in float x, in float bias) {
-          return x / ((((1./bias)-2.)*(1.-x))+1.);
+      //https://cis700-procedural-graphics.github.io/files/toolbox_functions.pdf
+      //(nb, switched arguments)
+      float bias(float t, float b) {
+        return pow(t, log(b) / log(0.5));
       }
-      float gain(in float x, in float g) {
-          float g1 = bias(x*2., g) / 2.;
-          float g2 = bias(x*2. - 1., 1. - g) / 2.+.5;
-          if (x<0.5) {
-              return g1;
-          } else {
-              return g2;
-          }
-          return mix(g1, g2, .5 + .5*sign(g-.5)); //not sure what's wrong
+      float gain(float t, float g) {
+        if (t < 0.5) return bias(2.*t, 1.-g) / 2.;
+        else return 1. - bias(2. - 2.*t, 1.-g) / 2.;
       }
 
       //http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
@@ -104,15 +101,17 @@
         polar.y = Angle + (fr > 0.5 ? 1.-fr : fr) * segAng;
         polar.x *= Zoom;
         
-        vec2 uv2 = pol2car(polar)+ImageCentre;
+        
+        vec2 uv2 = mix(uv, pol2car(polar)+ImageCentre, KaleidMix);
         uv2 = mozaic(uv2, Mozaic, MozMix, MozPow);
         uv2.x /= ScreenAspect;
         uv2 = mirrorRepeat(uv2, UVLimit);
 
         vec4 col = texture2D(texture1, uv2);
         vec3 colHSV = rgb2hsv(col.rgb);
-        colHSV.y = gain(bias(colHSV.y, SaturationBias), SaturationGain);
+        //colHSV.y = gain(bias(colHSV.y, SaturationBias), SaturationGain);
         //colHSV.z = gain(bias(colHSV.z, ContrastBias), ContrastGain);
+        colHSV.y = bias(gain(colHSV.y, SaturationGain), SaturationBias);
         colHSV.z = bias(gain(colHSV.z, ContrastGain), ContrastBias);
         col.rgb = hsv2rgb(colHSV);
         //col.rg += uv2 - mirrorRepeat(uv2, UVLimit);

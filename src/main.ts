@@ -53,6 +53,7 @@ const parms = params.makeGUI([
     {name: "Angle", value: 1.05, min: -Math.PI, max: Math.PI},
     {name: "OutAngle", value: 0, min: -1, max: 1},
     {name: "Zoom", value: 1.3, min: 0, max: 10},
+    {name: "KaleidMix", value: 0.999, min: 0, max: 1},
     //not great as is, but maybe something later (off off on?)
     {name: "Mozaic", value: 4, min: 1, max: 40},
     {name: "MozMix", value: 0.3, min: 0, max: 1},
@@ -66,8 +67,8 @@ const parms = params.makeGUI([
 ], uniforms);
 
 vid.setup(renderer, uniforms);
-const gui = new dat.GUI();
-gui.add(vid.vidEl, 'playbackRate').min(0).max(20).name('rate1');
+// const gui = new dat.GUI();
+// gui.add(vid.vidEl, 'playbackRate').min(0).max(20).name('rate1');
 //gui.add(vidEl2, 'playbackRate').min(0).max(20).name('rate2');
 //gui.add(vidEl3, 'playbackRate').min(0).max(20).name('rate3');
 
