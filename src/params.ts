@@ -32,22 +32,27 @@ class LagNum {
 
 export interface Scalar {
     name: string,
-    v?: number,// | THREE.Vector2 | THREE.Vector3 | THREE.Vector4,
+    value?: number,// | THREE.Vector2 | THREE.Vector3 | THREE.Vector4,
     min?: number,
     max?: number,
     step?: number
 }
 
 const gui = new dat.GUI();
-export const makeUniforms = (specs: Scalar[], uniforms:any = {}) => {
+export const makeGUI = (specs: Scalar[], uniforms:any = {}) => {
     const parms: ShaderParam[] = [];
     specs.forEach(s => {
         //uniforms[s.name] = {value: s.v}
-        const p = new ShaderParam(uniforms, s.name, s.v, s.min, s.max);
+        const p = new ShaderParam(uniforms, s.name, s.value, s.min, s.max);
         parms.push(p);
         gui.add(p.val, 'targVal', s.min, s.max, s.step).name(s.name);
     });
     return parms;
+}
+
+export class ParamGroup {
+    parms: ShaderParam[] = [];
+    lagTime: number = 1000;
 }
 
 export class ShaderParam {
@@ -57,7 +62,7 @@ export class ShaderParam {
     max: number;
     uniforms: any; //the structure of which this is a member
     uniformObj: any; //TODO: type
-    constructor(uniforms, name, init= 0.5, min= 0, max= 1, lagTime = 1000) {
+    constructor(uniforms, name, init= 0.5, min= 0, max= 1, lagTime = 10000) {
         this.uniforms = uniforms;
         if (this.uniforms[name]) this.uniformObj = this.uniforms[name];
         else this.uniforms[name] = { value: init };
