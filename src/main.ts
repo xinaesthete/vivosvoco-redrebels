@@ -11,7 +11,7 @@ import {
     VideoTexture,
     WebGLRenderer
 } from 'three'
-import {makeGUI} from './params'
+import * as params from './params'
 import * as vid from './video_state'
 import * as dat from 'dat.gui'
 
@@ -34,7 +34,7 @@ const fs = document.getElementById('k-fragment-shader').textContent;
 
 let w = window.innerWidth, h = window.innerHeight;
 
-const uniforms = {
+const uniforms: params.Uniforms = {
     ScreenAspect: {value: w/h},
     Leaves: {value: 3},
     Angle: {value: 1.05},
@@ -48,12 +48,14 @@ const uniforms = {
     // texture3: {value: vidTex3}
 };
 
-const parms = makeGUI([
+const parms = params.makeGUI([
     {name: "Leaves", value: 3, min: 1, max: 8, step: 1},
     {name: "Angle", value: 1.05, min: -Math.PI, max: Math.PI},
     {name: "OutAngle", value: 0, min: -1, max: 1},
     {name: "Zoom", value: 1.3, min: 0, max: 10},
+    {name: "ImageCentre", value: new Vector2(0.5, 0), min: -1, max: 1},
 ], uniforms);
+
 vid.setup(renderer, uniforms);
 const gui = new dat.GUI();
 gui.add(vid.vidEl, 'playbackRate').min(0).max(20).name('rate1');
