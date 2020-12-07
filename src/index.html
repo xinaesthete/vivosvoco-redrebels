@@ -25,8 +25,9 @@
       uniform float Zoom;
       uniform float Angle;
       uniform float OutAngle;
-      uniform float Pixelate;
-      uniform float PixMix;
+      uniform float Mozaic;
+      uniform float MozMix;
+      uniform float MozPow;
       uniform vec2 Centre;
       uniform vec2 ImageCentre;
 
@@ -46,9 +47,14 @@
         //return abs(mod((vec2(-1.)-uv),vec2(2.))+vec2(1.));
         return min(abs(mod(uv, 2.*limit)), abs(mod(2.*limit-uv, 2.*limit)));
       }
-      vec2 pixelate(vec2 uv, float p) {
+      vec2 mozaic(vec2 uv, float num, float strength, float p) {
         //TODO change GLSL version, use round
-        return (floor(0.5 + uv*p)-0.5) / p;
+        vec2 uv2 = 0.5 + uv*num;
+        vec2 _frac = abs(fract(uv2)-0.5) * 2.;
+        _frac = pow(_frac, vec2(p));
+        vec2 _floor = floor(uv2);
+        uv2 = _floor / num;
+        return mix(uv, uv2, strength* (1.-_frac));
       }
 
 
@@ -65,8 +71,7 @@
         polar.x *= Zoom;
         
         vec2 uv2 = pol2car(polar)+ImageCentre;
-        vec2 pixUv = pixelate(uv2, Pixelate);
-        uv2 = mix(uv2, pixUv, PixMix);
+        uv2 = mozaic(uv2, Mozaic, MozMix, MozPow);
         uv2.x /= ScreenAspect;
         uv2 = mirrorRepeat(uv2, UVLimit);
 
