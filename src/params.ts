@@ -83,7 +83,8 @@ export interface Tweakable<T extends Numeric> {
     value?: T,
     min?: number,
     max?: number,
-    step?: number
+    step?: number,
+    shapeFn?: (T) => T
 }
 export type Uniforms = Record<string, Tweakable<any>>;
 //no such luck
