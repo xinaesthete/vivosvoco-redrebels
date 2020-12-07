@@ -87,7 +87,8 @@ function animate(time: number) {
   uniforms.UVLimit.value = img.repeat;
   const dt = time - t0;
   t0 = time;
-  parms.forEach(p => p.update(dt))
+//   parms.forEach(p => p.update(dt))
+  parms.update(dt);
   renderer.render(scene, camera);
 }
 animate(t0);

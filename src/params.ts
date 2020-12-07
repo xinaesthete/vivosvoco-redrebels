@@ -10,6 +10,7 @@ function lerp(s, t, a) {
 //implement other types when needed (less to refactor while figuring out design)
 type Numeric = number | THREE.Vector2; // | THREE.Vector3 | THREE.Vector4;
 interface Lagger<T extends Numeric> {
+    lagTime: number;
     update(dt: number) : T;
 }
 class LagNum implements Lagger<number> {
@@ -31,11 +32,13 @@ class LagVec2 implements Lagger<THREE.Vector2> {
     outputVec: THREE.Vector2;
     lagX: LagNum;
     lagY: LagNum;
+    private _lagTime: number;
     constructor(controlVec: THREE.Vector2, lagTime: number) {
         this.controlVec = controlVec;
         this.outputVec = controlVec.clone();
         this.lagX = new LagNum(controlVec.x, lagTime);
         this.lagY = new LagNum(controlVec.y, lagTime);
+        this._lagTime = lagTime;
     }
     update(dt: number) {
         this.lagX.targVal = this.controlVec.x;
@@ -43,6 +46,14 @@ class LagVec2 implements Lagger<THREE.Vector2> {
         this.outputVec.x = this.lagX.update(dt);
         this.outputVec.y = this.lagY.update(dt);
         return this.outputVec;
+    }
+    public get lagTime() {
+        return this._lagTime;
+    }
+    public set lagTime(t: number) {
+        this._lagTime = t;
+        this.lagX.lagTime = t;
+        this.lagY.lagTime = t;
     }
 }
 function isNum(v: Numeric) : v is number {
@@ -92,34 +103,41 @@ export type Uniforms = Record<string, Tweakable<any>>;
 
 const gui = new dat.GUI();
 export const makeGUI = (specs: Tweakable<Numeric>[], uniforms:any = {}) => {
-    const parms: ShaderParam[] = [];
-    specs.forEach(s => {
-        //uniforms[s.name] = {value: s.value}
-        const v = s.value;
-        if (v === undefined) return;
-        if (typeof v === "number") {
-            const p = new ShaderParam(uniforms, s.name, v, s.min, s.max);
-            parms.push(p);
-            gui.add(p.val, 'targVal', s.min, s.max, s.step).name(s.name);
-        } else if (isVec2(v)) {
-            //make the initial value v passed to ShaderParam contain the 'target' values
-            //to be updated by the GUI, while the actual values passed to uniform will be encapsulated
-            const p = new ShaderParam(uniforms, s.name, v, s.min, s.max);
-            parms.push(p);
-            gui.add(v, 'x', s.min, s.max, s.step).name(s.name + '.x');
-            gui.add(v, 'y', s.min, s.max, s.step).name(s.name + '.y');
-        }
-    });
-    return parms;
+    return new ParamGroup(specs, uniforms);
 }
-
-//export const uniformGui()
 
 
 
 export class ParamGroup {
     parms: ShaderParam[] = [];
     lagTime: number = 1000;
+    constructor(specs: Tweakable<Numeric>[], uniforms:any = {}) {
+        const parms = this.parms;
+        gui.add(this, 'lagTime', 0, 20000);
+        specs.forEach(s => {
+            //uniforms[s.name] = {value: s.value}
+            const v = s.value;
+            if (v === undefined) return;
+            if (typeof v === "number") {
+                const p = new ShaderParam(uniforms, s.name, v, s.min, s.max);
+                parms.push(p);
+                gui.add(p.val, 'targVal', s.min, s.max, s.step).name(s.name);
+            } else if (isVec2(v)) {
+                //make the initial value v passed to ShaderParam contain the 'target' values
+                //to be updated by the GUI, while the actual values passed to uniform will be encapsulated
+                const p = new ShaderParam(uniforms, s.name, v, s.min, s.max);
+                parms.push(p);
+                gui.add(v, 'x', s.min, s.max, s.step).name(s.name + '.x');
+                gui.add(v, 'y', s.min, s.max, s.step).name(s.name + '.y');
+            }
+        });
+    }
+    update(dt: number) {
+        this.parms.forEach(p=>{
+            p.val.lagTime = this.lagTime;
+            p.update(dt);
+        });
+    }
 }
 
 export class ShaderParam {
