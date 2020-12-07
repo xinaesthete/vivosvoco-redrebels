@@ -54,7 +54,8 @@ const parms = params.makeGUI([
     {name: "OutAngle", value: 0, min: -1, max: 1},
     {name: "Zoom", value: 1.3, min: 0, max: 10},
     //not great as is, but maybe something later (off off on?)
-    {name: "Pixelate", value: 2000, min: 1, max: 2000},
+    {name: "Pixelate", value: 40, min: 1, max: 40},
+    {name: "PixMix", value: 0.3, min: 0, max: 1},
     {name: "ImageCentre", value: new Vector2(0.5, 0), min: -1, max: 1},
     {name: "Centre", value: new Vector2(0.5, 0.5), min: 0, max: 1},
 ], uniforms);
