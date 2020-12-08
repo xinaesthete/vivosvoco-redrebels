@@ -51,6 +51,7 @@ const uniforms: params.Uniforms = {
 const parms = params.makeGUI([
     {name: "Leaves", value: 3, min: 1, max: 8, step: 1},
     {name: "Angle", value: 1.05, min: -Math.PI, max: Math.PI},
+    {name: "AngleGain", value: 0.5, min: 0, max: 1},
     {name: "OutAngle", value: 0, min: -1, max: 1},
     {name: "Zoom", value: 1.3, min: 0, max: 10},
     {name: "KaleidMix", value: 0.999, min: 0, max: 1},
@@ -58,8 +59,9 @@ const parms = params.makeGUI([
     {name: "Mozaic", value: 4, min: 1, max: 40},
     {name: "MozMix", value: 0.3, min: 0, max: 1},
     {name: "MozPow", value: 1.5, min: 0, max: 10},
-    {name: "ContrastBias", value: 0.5, min: 0, max: 1},
+    {name: "ContrastPreBias", value: 0.5, min: 0, max: 1},
     {name: "ContrastGain", value: 0.5, min: 0, max: 1},
+    {name: "ContrastPostBias", value: 0.5, min: 0, max: 1},
     {name: "SaturationBias", value: 0.5, min: 0, max: 1},
     {name: "SaturationGain", value: 0.5, min: 0, max: 1},
     {name: "ImageCentre", value: new Vector2(0.5, 0), min: -1, max: 1},
