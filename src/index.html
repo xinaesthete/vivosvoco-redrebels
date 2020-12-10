@@ -30,6 +30,7 @@
       uniform float Mozaic;
       uniform float MozMix;
       uniform float MozPow;
+      uniform float MozGain;
       uniform float ContrastPostBias;
       uniform float ContrastPreBias;
       uniform float ContrastGain;
@@ -37,6 +38,7 @@
       uniform float SaturationGain;
       uniform vec2 Centre;
       uniform vec2 ImageCentre;
+      uniform vec2 Vignette;
 
       varying vec4 vertColor;
       varying vec2 vertTexCoord;
@@ -63,6 +65,12 @@
         if (t < 0.5) return bias(2.*t, 1.-g) / 2.;
         else return 1. - bias(2. - 2.*t, 1.-g) / 2.;
       }
+      vec2 gain(vec2 t, float g) {
+        return vec2(gain(t.x, g), gain(t.y, g));
+      }
+      vec2 gain(vec2 t, vec2 g) {
+        return vec2(gain(t.x, g.x), gain(t.y, g.y));
+      }
 
       //http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
       vec3 hsv2rgb(in vec3 c) {
@@ -80,14 +88,21 @@
           float e = 1.0e-10;
           return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
       }
-      vec2 mozaic(vec2 uv, float num, float strength, float p) {
+      vec2 mozaic(vec2 uv, float num, float strength, float p, float g) {
         //TODO change GLSL version, use round
-        vec2 uv2 = 0.5 + uv*num;
-        vec2 _frac = abs(fract(uv2)-0.5) * 2.;
-        _frac = pow(_frac, vec2(p));
+//        vec2 uv2 = 0.5 + uv*num;
+//        vec2 _frac = abs(fract(uv2)-0.5) * 2.;
+//        _frac = gain(pow(_frac, vec2(p)), g);
+//        vec2 _floor = floor(uv2);
+//        uv2 = _floor / num;
+//        return mix(uv, uv2, strength* (1.-_frac));
+        vec2 uv2 = (uv-0.5)*num;
+        vec2 _frac = gain(fract(uv2), g);
         vec2 _floor = floor(uv2);
         uv2 = _floor / num;
-        return mix(uv, uv2, strength* (1.-_frac));
+        uv2 += _frac / num;
+        uv2 += 0.5;
+        return mix(uv, uv2, strength);
       }
 
 
@@ -106,8 +121,8 @@
         
         
         vec2 uv2 = mix(uv, pol2car(polar)+ImageCentre, KaleidMix);
-        uv2 = mozaic(uv2, Mozaic, MozMix, MozPow);
-        uv2.x /= ScreenAspect;
+        uv2 = mozaic(uv2, Mozaic, MozMix, MozPow, MozGain);
+        uv2.x *= ScreenAspect;
         uv2 = mirrorRepeat(uv2, UVLimit);
 
         vec4 col = texture2D(texture1, uv2);
@@ -116,13 +131,8 @@
         colHSV.z = bias(colHSV.z, ContrastPreBias);
         colHSV.z = bias(gain(colHSV.z, ContrastGain), ContrastPostBias);
         col.rgb = hsv2rgb(colHSV);
-        //col.rg += uv2 - mirrorRepeat(uv2, UVLimit);
 
-        //col = min(col, texture2D(texture2, uv2));
-        //col = min(col, texture2D(texture3, uv2));
-        //col /= 3.;
-
-        gl_FragColor = col;// * vertColor;
+        gl_FragColor = col;
       }
 
     </script>

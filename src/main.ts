@@ -59,6 +59,7 @@ const parms = params.makeGUI([
     {name: "Mozaic", value: 4, min: 1, max: 40},
     {name: "MozMix", value: 0.3, min: 0, max: 1},
     {name: "MozPow", value: 1.5, min: 0, max: 10},
+    {name: "MozGain", value: .5, min: 0, max: 1},
     {name: "ContrastPreBias", value: 0.5, min: 0, max: 1},
     {name: "ContrastGain", value: 0.5, min: 0, max: 1},
     {name: "ContrastPostBias", value: 0.5, min: 0, max: 1},
