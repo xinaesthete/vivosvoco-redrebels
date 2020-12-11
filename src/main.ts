@@ -40,6 +40,7 @@ const uniforms: params.Uniforms = {
     Angle: {value: 1.05},
     OutAngle: {value: 0},
     Zoom: {value: 1.3},
+    MozMix: {value: 1.},
     Centre: {value: new Vector2(0.5, 0.5)},
     ImageCentre: {value: new Vector2(0.5, 0.)},
     UVLimit: {value: new Vector2(1920/2048, 1080/2048)},// vidTex.repeat},
@@ -57,8 +58,8 @@ const parms = params.makeGUI([
     {name: "KaleidMix", value: 0.999, min: 0, max: 1},
     //not great as is, but maybe something later (off off on?)
     {name: "Mozaic", value: 4, min: 1, max: 40},
-    {name: "MozMix", value: 0.3, min: 0, max: 1},
-    {name: "MozPow", value: 1.5, min: 0, max: 10},
+    // {name: "MozMix", value: 0.3, min: 0, max: 1},
+    // {name: "MozPow", value: 1.5, min: 0, max: 10},
     {name: "MozGain", value: .5, min: 0, max: 1},
     {name: "ContrastPreBias", value: 0.5, min: 0, max: 1},
     {name: "ContrastGain", value: 0.5, min: 0, max: 1},

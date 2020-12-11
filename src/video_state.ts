@@ -1,10 +1,11 @@
 import * as THREE from 'three'
-import * as im1 from '../assets/20200410_125907.webm' //./vid1.webm'
+import * as im1 from '../assets/20200410_125907.mp4' //./vid1.webm'
 
 export const vidEl = document.getElementById("vid1") as HTMLVideoElement;
 const vidUrl = im1; // require('../rebels/vid1.webm');
 console.log(vidUrl);
 vidEl.src = vidUrl;
+setTimeout(()=>vidEl.play(), 3000);
 export const vidTex: THREE.Texture = new THREE.VideoTexture(vidEl);
 
 // const vidEl2 = document.getElementById("vid2") as HTMLVideoElement;

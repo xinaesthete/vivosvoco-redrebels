@@ -63,7 +63,7 @@ module.exports = merge({
         ]
       },
       {
-        test: /\.webm$/,
+        test: /\.(webm|mp4)$/,
         //use: [{loader: 'file-loader'}]
         loader: 'file-loader'
       }
