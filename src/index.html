@@ -122,7 +122,10 @@
         
         vec2 uv2 = mix(uv, pol2car(polar)+ImageCentre, KaleidMix);
         uv2 = mozaic(uv2, Mozaic, MozMix, MozPow, MozGain);
-        uv2.x *= ScreenAspect;
+
+        //uv2 = vertTexCoord;
+
+        //uv2.x *= ScreenAspect;
         uv2 = mirrorRepeat(uv2, UVLimit);
 
         vec4 col = texture2D(texture1, uv2);
@@ -131,6 +134,10 @@
         colHSV.z = bias(colHSV.z, ContrastPreBias);
         colHSV.z = bias(gain(colHSV.z, ContrastGain), ContrastPostBias);
         col.rgb = hsv2rgb(colHSV);
+
+        float feather = smoothstep(0., Vignette.x, 0.5-abs(0.5-vertTexCoord.x));
+        feather *= smoothstep(0., Vignette.y, 0.5-abs(0.5-vertTexCoord.y));
+        col.a = feather;
 
         gl_FragColor = col;
       }

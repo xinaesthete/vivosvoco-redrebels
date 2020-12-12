@@ -35,16 +35,16 @@ const fs = document.getElementById('k-fragment-shader').textContent;
 let w = window.innerWidth, h = window.innerHeight;
 
 const uniforms: params.Uniforms = {
-    ScreenAspect: {value: w/h},
-    Leaves: {value: 3},
-    Angle: {value: 1.05},
-    OutAngle: {value: 0},
-    Zoom: {value: 1.3},
-    MozMix: {value: 1.},
-    Centre: {value: new Vector2(0.5, 0.5)},
-    ImageCentre: {value: new Vector2(0.5, 0.)},
-    UVLimit: {value: new Vector2(1920/2048, 1080/2048)},// vidTex.repeat},
-    texture1: {value: vid.vidTex},
+    'ScreenAspect': {value: w/h},
+    'Leaves': {value: 3},
+    'Angle': {value: 1.05},
+    'OutAngle': {value: 0},
+    'Zoom': {value: 1.3},
+    'MozMix': {value: 1.},
+    'Centre': {value: new Vector2(0.5, 0.5)},
+    'ImageCentre': {value: new Vector2(0.5, 0.)},
+    'UVLimit': {value: new Vector2(1920/2048, 1080/2048)},// vidTex.repeat},
+    'texture1': {value: vid.vidTex},
     // texture2: {value: vidTex2},
     // texture3: {value: vidTex3}
 };
@@ -68,6 +68,7 @@ const parms = params.makeGUI([
     {name: "SaturationGain", value: 0.5, min: 0, max: 1},
     {name: "ImageCentre", value: new Vector2(0.5, 0), min: -1, max: 1},
     {name: "Centre", value: new Vector2(0.5, 0.5), min: 0, max: 1},
+    {name: "Vignette", value: new Vector2(0.1, 0.1), min: 0, max: 0.2},
 ], uniforms);
 
 vid.setup(renderer, uniforms);
@@ -77,7 +78,7 @@ vid.setup(renderer, uniforms);
 //gui.add(vidEl3, 'playbackRate').min(0).max(20).name('rate3');
 
 const geo = new PlaneGeometry(2, 2);
-const mat = new ShaderMaterial({vertexShader: vs, fragmentShader: fs, uniforms: uniforms});
+const mat = new ShaderMaterial({vertexShader: vs, fragmentShader: fs, uniforms: uniforms, transparent: true});
 const mesh = new Mesh(geo, mat);
 mesh.position.x = 0.5;
 mesh.position.y = 0.5;

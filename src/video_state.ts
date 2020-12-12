@@ -8,6 +8,14 @@ vidEl.src = vidUrl;
 setTimeout(()=>vidEl.play(), 3000);
 export const vidTex: THREE.Texture = new THREE.VideoTexture(vidEl);
 
+/** make sure texture settings are not going to force it to be scaled down to POT size before it gets used. */
+function setTextureParams(t: THREE.Texture) {
+    t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+    t.minFilter = t.magFilter = THREE.LinearFilter;
+}
+
+setTextureParams(vidTex);
+
 // const vidEl2 = document.getElementById("vid2") as HTMLVideoElement;
 // const vidUrl2 = im2;
 // console.log(vidUrl2);
@@ -49,6 +57,7 @@ export function setup(renderer: THREE.Renderer, uniforms: any) {
                         }
                     } else if (file.type.startsWith('image/')) {
                         const t = uniforms.texture1.value = new THREE.TextureLoader().load(readEvent.target.result as string);
+                        setTextureParams(t);
                     }
                 };
             }

@@ -91,7 +91,7 @@ function getLagger(v: Numeric, lagTime: number): Lagger<Numeric> {
 
 export interface Tweakable<T extends Numeric> {
     name?: string,
-    value?: T,
+    value: T,
     min?: number,
     max?: number,
     step?: number,
